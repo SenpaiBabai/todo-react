@@ -1,95 +1,50 @@
-import React, { useState } from "react";
+import React, {useState} from "react";
 import Todo from "./components/Todo";
 import Form from "./components/Form";
-import FilterButton from "./components/FilterButton";
-import { nanoid } from "nanoid";
+import {nanoid} from 'nanoid';
 
-const FILTER_MAP = {
-    All: () => true,
-    Active: (task) => !task.completed,
-    Completed: (task) => task.completed,
+let DATA = [
+  {id: '234e23', name: 'test', checked: false},
+  {id: '234asdf23', name: 'test2', checked: false}
+];
+
+function App() {
+  const [allTasks, setAllTasks] = useState(DATA)
+
+  function addTask(newName) {
+    const newTask = {id: nanoid(), name: newName, checked: false};
+    return setAllTasks([...allTasks, newTask])
+  }
+
+  function deleteTask(idDelete) {
+    let newTask = allTasks.filter((filter) => idDelete !== filter.id);
+    return setAllTasks(newTask)
+  } 
+
+  const tasks = allTasks.map((task) => (
+    <Todo
+      id={task.id}
+      name={task.name}
+      checked={task.checked}
+      deleteTask={deleteTask}
+    />
+  ))
+
+  const form = (
+    <Form 
+      addTask={addTask}
+    />
+  )
+
+  return (
+    <div className="todoapp stack-large">
+      <h1>TodoMatic</h1>
+      {form}
+      <ul role="list" className="todo-list stack-large stack-exception" aria-labelledby="list-heading" >
+        {tasks}
+      </ul>
+    </div>
+  );
 }
 
-const FILTER_NAMES = Object.keys(FILTER_MAP);
-
-function App(props) {
-    const [tasks, setTask] = useState(props.tasks)
-    const [filter, setFilter] = useState('All');
-
-    function addTask(name) {
-        const newTask = {id: `todo-${nanoid()}`, name, completed: false};
-        setTask([...tasks, newTask])
-    }
-
-    function deleteTask(id){
-        const updatedTasks = tasks.filter((task) => id !== task.id);
-        setTask(updatedTasks);
-    }
-
-    function toggleTaskCompleted(id) {
-        const updatedTasks = tasks.map((task) => {
-            if (id === task.id) {
-                return {...task, completed: !task.completed}
-            }
-            return task;
-        });
-        setTask(updatedTasks);
-    }
-
-    function editTask(id, newName){
-        const editedTask = tasks.map((task) => {
-            if (id === task.id) {
-                return {...task, name: newName}
-            }
-            return task;
-        });
-        setTask(editedTask);
-    }
-
-    const taskList = tasks
-        .filter(FILTER_MAP[filter])
-        .map((task) => (
-        <Todo
-            id={task.id}
-            name={task.name}
-            completed={task.completed}
-            key={task.id}
-            toggleTaskCompleted={toggleTaskCompleted}
-            deleteTask={deleteTask}
-            editTask={editTask}
-        />
-    ));
-
-    const filterList = FILTER_NAMES.map((name) => (
-        <FilterButton
-            key={name}
-            name={name}
-            isPressed={name === filter}
-            setFilter={setFilter}
-        />
-    ))
-
-    const tasksNoun = taskList.length !== 1 ? 'tasks' : 'task';
-    const headingText = `${taskList.length} ${tasksNoun} remaining`;
-
-    return (
-        <div className="todoapp stack-large">
-            <h1>TodoMatic</h1>
-            <Form addTask={addTask} />
-            <div className="filters btn-group stack-exception">
-                {filterList}
-            </div>
-            <h2 id="list-heading">
-                {headingText}
-            </h2>
-            <ul
-                role="list"
-                className="todo-list stack-large stack-exception"
-                aria-labelledby="list-heading"
-            >
-                {taskList}
-            </ul>
-        </div>
-    );
-}
-export default App;
+export default App; 
